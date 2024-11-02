@@ -1,0 +1,25 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: spring-boilerplate
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+    config:
+      import: classpath:application.yml
+
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: Asia/Seoul
+
+logging:
+  level:
+    org.springframework.web: ERROR
