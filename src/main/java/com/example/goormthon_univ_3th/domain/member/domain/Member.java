@@ -1,10 +1,7 @@
 package com.example.goormthon_univ_3th.domain.member.domain;
 
 import com.example.goormthon_univ_3th.global.common.base.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -18,10 +15,14 @@ public class Member extends BaseEntity {
     private String name;
     private String email;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     @Builder
     public Member(String name, String email) {
         this.name = name;
         this.email = email;
+        this.role = Role.MEMBER;
     }
 
 
