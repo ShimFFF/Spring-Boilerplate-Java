@@ -9,7 +9,7 @@ import lombok.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class member {
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +18,7 @@ public class member {
     private String email;
 
     @Builder
-    public member(String name, String email) {
+    public Member(String name, String email) {
         this.name = name;
         this.email = email;
     }
