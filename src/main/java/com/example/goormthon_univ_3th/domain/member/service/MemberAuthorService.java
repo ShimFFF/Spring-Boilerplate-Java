@@ -18,4 +18,6 @@ public interface MemberAuthorService {
     MemberIdResponse logout(Member member);
     // 회원 탈퇴
     MemberIdResponse withdrawal(Member member);
+
+    Member loadEntity(Long id);
 }
