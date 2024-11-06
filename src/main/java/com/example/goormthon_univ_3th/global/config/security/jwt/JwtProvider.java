@@ -15,8 +15,11 @@ import java.util.Base64;
 @Component
 public class JwtProvider {
 
-    @Value("${jwt.jwt-key}")
+    @Value("${jwt.secret}")
     private String jwtSecretKey;
+
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
 
     private Key key;
 
@@ -26,9 +29,9 @@ public class JwtProvider {
         this.key = new SecretKeySpec(keyBytes, SignatureAlgorithm.HS256.getJcaName());
     }
 
-    public String generateToken(String subject, String role, long validityInMilliseconds) {
+    public String generateToken(String subject, String role) {
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + validityInMilliseconds);
+        Date expiration = new Date(now.getTime() + jwtExpiration);
 
         Claims claims = Jwts.claims().setSubject(subject);
         claims.put("role", role);
