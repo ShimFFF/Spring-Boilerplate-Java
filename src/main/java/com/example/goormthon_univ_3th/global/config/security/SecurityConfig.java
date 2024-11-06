@@ -2,8 +2,10 @@ package umc.dofarming.security;
 
 import com.example.goormthon_univ_3th.global.config.security.auth.CustomAccessDeniedHandler;
 import com.example.goormthon_univ_3th.global.config.security.jwt.JwtAuthenticationFilter;
+import com.example.goormthon_univ_3th.global.config.security.jwt.JwtExceptionFilter;
 import com.example.goormthon_univ_3th.global.config.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,9 +23,31 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private JwtProvider jwtProvider;
+    private final JwtProvider jwtProvider;
+    private final JwtExceptionFilter jwtExceptionFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-    private CustomAccessDeniedHandler customAccessDeniedHandler;
+    @Bean
+    public JwtProvider jwtProvider() {
+        return new JwtProvider();
+    }
+
+    @Bean
+    public CustomAccessDeniedHandler customAccessDeniedHandler() {
+        return new CustomAccessDeniedHandler();
+    }
+
+    @Bean
+    public JwtExceptionFilter jwtExceptionFilter() {
+        return new JwtExceptionFilter();
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtProvider);
+    }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -45,8 +69,10 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                .exceptionHandling(exception -> exception.accessDeniedHandler(customAccessDeniedHandler))
-                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exception ->
+                        exception.accessDeniedHandler(customAccessDeniedHandler))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class)
                 .build();
     }
 }
