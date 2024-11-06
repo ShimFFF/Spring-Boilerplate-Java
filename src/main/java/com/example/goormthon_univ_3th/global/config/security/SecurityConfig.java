@@ -1,6 +1,8 @@
 package umc.dofarming.security;
 
 import com.example.goormthon_univ_3th.global.config.security.auth.CustomAccessDeniedHandler;
+import com.example.goormthon_univ_3th.global.config.security.jwt.JwtAuthenticationFilter;
+import com.example.goormthon_univ_3th.global.config.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +21,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtTokenProvider jwtTokenProvider;
-    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private JwtProvider jwtProvider;
+
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -43,7 +46,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception.accessDeniedHandler(customAccessDeniedHandler))
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }
