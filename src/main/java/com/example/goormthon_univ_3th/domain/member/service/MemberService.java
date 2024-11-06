@@ -19,4 +19,10 @@ public class MemberService {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new RestApiException(MemberErrorStatus.EMPTY_MEMBER));
     }
+
+    // 회원 저장
+    public Member saveEntity(Member member) {
+        return memberRepository.save(member);
+    }
+
 }
