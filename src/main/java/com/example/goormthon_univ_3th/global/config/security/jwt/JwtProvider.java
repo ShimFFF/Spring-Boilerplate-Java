@@ -18,8 +18,12 @@ public class JwtProvider {
     @Value("${jwt.secret}")
     private String jwtSecretKey;
 
-    @Value("${jwt.expiration}")
-    private long jwtExpiration;
+    @Value("${jwt.refreshExpiration}")
+    private long jwtAccessExpiration;
+
+    @Value("${jwt.accessExpiration}")
+    private long jwtRefreshExpiration;
+
 
     private Key key;
 
@@ -29,11 +33,17 @@ public class JwtProvider {
         this.key = new SecretKeySpec(keyBytes, SignatureAlgorithm.HS256.getJcaName());
     }
 
-    public String generateToken(String subject, String role) {
+    public String generateToken(String subject, String role, TokenType tokenType) {
         Date now = new Date();
-        Date expiration = new Date(now.getTime() + jwtExpiration);
+        Date expiration;
+        // 분기 나눠야 ㅐ-해, 리프레쉬 토큰과 액세스 토큰의 만료시간이 다르니까
+        if (TokenType.ACCESS.equals(tokenType)) { // 액세스 토큰
+            expiration=calculateExpirationDate(now, jwtAccessExpiration);
+        } else { // 리프레쉬 토큰
+            expiration=calculateExpirationDate(now, jwtRefreshExpiration);
+        }
 
-        Claims claims = Jwts.claims().setSubject(subject);
+        Claims claims = Jwts.claims().setSubject(subject); // JWT payload 에 저장되는 정보단위
         claims.put("role", role);
 
         return Jwts.builder()
@@ -43,6 +53,14 @@ public class JwtProvider {
                 .signWith(key)
                 .compact();
     }
+
+    private Date calculateExpirationDate(Date createdDate, long jwtExpiration) {
+        return new Date(createdDate.getTime() + jwtExpiration);
+    }
+
+    // todo: 리프레쉬 토큰으로 새로운 액세스 토큰을 발급하는 함수
+
+    // todo: 리프레쉬와 액세스 토큰의 그 기간을 달리 해야해
 
     public boolean validateToken(String token) {
         try {

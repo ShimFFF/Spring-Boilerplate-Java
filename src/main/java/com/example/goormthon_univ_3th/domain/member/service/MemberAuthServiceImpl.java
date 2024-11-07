@@ -8,8 +8,10 @@ import com.example.goormthon_univ_3th.domain.member.dto.response.MemberIdRespons
 import com.example.goormthon_univ_3th.domain.member.dto.response.MemberLoginResponse;
 import com.example.goormthon_univ_3th.domain.member.repository.MemberRepository;
 import com.example.goormthon_univ_3th.global.common.exception.RestApiException;
+import com.example.goormthon_univ_3th.global.common.exception.code.status.AuthErrorStatus;
 import com.example.goormthon_univ_3th.global.config.security.jwt.JwtProvider;
 import com.example.goormthon_univ_3th.global.config.security.jwt.TokenInfo;
+import com.example.goormthon_univ_3th.global.config.security.jwt.TokenType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,10 +42,10 @@ public class MemberAuthServiceImpl implements MemberAuthorService {
     public MemberIdResponse signUp(Member member, MemberSignUpRequest request) {
         //이미 소셜 로그인 후, 인증 완료되면 멤버 엔티티는 생겨 있는 상태
         //그 후 추가 정보를 입력받아 저장하는 메서드
-
-        Member loginMember = loadEntity(member.getId());
+        Member loginMember = memberService.findById(member.getId());
 
         // 기본 정보 저장 로직 작성 필요
+        loginMember.setName(request.getName());
 
         return new MemberIdResponse(memberService.saveEntity(loginMember).getId());
     }
@@ -53,23 +55,30 @@ public class MemberAuthServiceImpl implements MemberAuthorService {
     @Transactional
     public MemberGenerateTokenResponse generateNewAccessToken(String refreshToken, Member member) {
 
-        Member loginMember = loadEntity(member.getId());
+        Member loginMember = memberService.findById(member.getId());
 
-        RefreshToken savedRefreshToken = refreshTokenService.findByMemberId(loginMember.getId())
-                .orElseThrow(() -> new RestApiException(AuthErrorCode.EXPIRED_MEMBER_JWT));
+        // 만료된 refreshToken인지 확인
+        if (!jwtTokenProvider.validateToken(refreshToken))
+            throw new RestApiException(AuthErrorStatus.EXPIRED_REFRESH_TOKEN);
+
+        //편의상 refreshToken을 DB에 저장 후 비교하는 방식으로 감 (비추천)
+        String savedRefreshToken = loginMember.getRefreshToken();
 
         // 디비에 저장된 refreshToken과 동일하지 않다면 유효하지 않음
-        if (!refreshToken.equals(savedRefreshToken.getRefreshToken()))
-            throw new RestApiException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        if (!refreshToken.equals(savedRefreshToken))
+            throw new RestApiException(AuthErrorStatus.INVALID_REFRESH_TOKEN);
 
-        return new MemberGenerateTokenResponse(jwtTokenProvider.generateAccessToken(loginMember.getId()));
+        return new MemberGenerateTokenResponse(
+                jwtTokenProvider.generateToken(
+                        loginMember.getId().toString(), member.getRole().toString(), TokenType.ACCESS)
+        );
     }
 
     // 로그아웃 함수
     @Override
     @Transactional
     public MemberIdResponse logout(Member member) {
-        Member loginMember = loadEntity(member.getId());
+        Member loginMember = memberService.findById(member.getId());
 
         deleteRefreshToken(loginMember);
         return new MemberIdResponse(loginMember.getId());
@@ -80,7 +89,7 @@ public class MemberAuthServiceImpl implements MemberAuthorService {
     @Transactional
     public MemberIdResponse withdrawal(Member member) {
         // 멤버 soft delete
-        Member loginMember = loadEntity(member.getId());
+        Member loginMember = memberService.findById(member.getId());
 
         // refreshToken 삭제
         deleteRefreshToken(loginMember);
@@ -128,14 +137,4 @@ public class MemberAuthServiceImpl implements MemberAuthorService {
 
         refreshToken.ifPresent(refreshTokenService::delete);
     }
-
-    // 멤버 로드 함수
-    @Override
-    public Member loadEntity(Long id) {
-        return memberRepository.findById(id)
-                .orElseThrow(() -> new RestApiException(MemberErrorCode.EMPTY_MEMBER));
-    }
-
-
-
 }
