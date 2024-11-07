@@ -6,6 +6,7 @@ import com.example.goormthon_univ_3th.domain.member.dto.request.MemberSignUpRequ
 import com.example.goormthon_univ_3th.domain.member.dto.response.MemberGenerateTokenResponse;
 import com.example.goormthon_univ_3th.domain.member.dto.response.MemberIdResponse;
 import com.example.goormthon_univ_3th.domain.member.dto.response.MemberLoginResponse;
+import com.example.goormthon_univ_3th.domain.member.mapper.MemberMapper;
 import com.example.goormthon_univ_3th.domain.member.repository.MemberRepository;
 import com.example.goormthon_univ_3th.global.common.exception.RestApiException;
 import com.example.goormthon_univ_3th.global.common.exception.code.status.AuthErrorStatus;
@@ -23,8 +24,13 @@ import java.util.Optional;
 public class MemberAuthServiceImpl implements MemberAuthorService {
 
     public final MemberRepository memberRepository;
+
     public final MemberService memberService;
+    public final MemberRefreshTokenService refreshTokenService;
+
     public final JwtProvider jwtTokenProvider;
+
+    public final MemberMapper memberMapper;
 
     // 소셜 로그인을 수행하는 함수
     @Override
@@ -80,7 +86,7 @@ public class MemberAuthServiceImpl implements MemberAuthorService {
     public MemberIdResponse logout(Member member) {
         Member loginMember = memberService.findById(member.getId());
 
-        deleteRefreshToken(loginMember);
+        refreshTokenService.deleteRefreshToken(loginMember);
         return new MemberIdResponse(loginMember.getId());
     }
 
@@ -92,7 +98,7 @@ public class MemberAuthServiceImpl implements MemberAuthorService {
         Member loginMember = memberService.findById(member.getId());
 
         // refreshToken 삭제
-        deleteRefreshToken(loginMember);
+        refreshTokenService.deleteRefreshToken(loginMember);
 
         // 멤버 soft delete
         loginMember.delete();
@@ -124,17 +130,17 @@ public class MemberAuthServiceImpl implements MemberAuthorService {
 
     private MemberLoginResponse getNewToken(Member member, boolean isServiceMember) {
         // jwt 토큰 생성
-        TokenInfo tokenInfo = jwtTokenProvider.generateToken(member.getId());
+        TokenInfo tokenInfo = jwtTokenProvider.generateToken(member.getId().toString(), member.getRole().toString());
         // refreshToken 디비에 저장
-        refreshTokenService.saveTokenInfo(tokenInfo.getRefreshToken(), member.getId());
+        refreshTokenService.saveRefreshToken(tokenInfo.refreshToken(), member);
 
         return memberMapper.toLoginMember(member, tokenInfo, isServiceMember);
     }
 
-    // member 객체를 이용한 refreshToken 삭제 함수
-    private void deleteRefreshToken(Member member) {
-        Optional<RefreshToken> refreshToken = refreshTokenService.findByMemberId(member.getId());
-
-        refreshToken.ifPresent(refreshTokenService::delete);
+    // refresh 토큰 저장 함수
+    @Transactional
+    public void saveRefreshToken(String refreshToken, Member member) {
+        member.setRefreshToken(refreshToken);
+        memberRepository.save(member);
     }
 }

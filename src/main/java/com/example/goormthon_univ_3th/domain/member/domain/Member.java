@@ -27,6 +27,7 @@ public class Member extends BaseEntity {
     private String clientId;
 
     // 편의상 DB에 저장, 실제로는 저장하지 않게 해야 함
+    @Setter
     private String refreshToken;
 
 

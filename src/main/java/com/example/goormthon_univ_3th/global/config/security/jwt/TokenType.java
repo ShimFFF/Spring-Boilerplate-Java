@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum TokenType {
-    ACCESS("액세스 토큰"), REFRESH("리프레쉬 토큰");
+    ACCESS("액세스 토큰"), REFRESH("리프레쉬 토큰"), ;
     final String value;
 }

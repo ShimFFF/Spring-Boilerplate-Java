@@ -33,7 +33,7 @@ public class JwtProvider {
         this.key = new SecretKeySpec(keyBytes, SignatureAlgorithm.HS256.getJcaName());
     }
 
-    public String generateToken(String subject, String role, TokenType tokenType) {
+    public String generateToken(String memberId, String subject, TokenType tokenType) {
         Date now = new Date();
         Date expiration;
         // 분기 나눠야 ㅐ-해, 리프레쉬 토큰과 액세스 토큰의 만료시간이 다르니까
@@ -44,7 +44,7 @@ public class JwtProvider {
         }
 
         Claims claims = Jwts.claims().setSubject(subject); // JWT payload 에 저장되는 정보단위
-        claims.put("role", role);
+        claims.put("memberId",  memberId);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -52,6 +52,13 @@ public class JwtProvider {
                 .setExpiration(expiration)
                 .signWith(key)
                 .compact();
+    }
+
+    public TokenInfo generateToken(String memberId, String subject) {
+        String accessToken = generateToken(memberId, subject, TokenType.ACCESS);
+        String refreshToken = generateToken(memberId, subject, TokenType.REFRESH);
+
+        return new TokenInfo(accessToken, refreshToken);
     }
 
     private Date calculateExpirationDate(Date createdDate, long jwtExpiration) {
