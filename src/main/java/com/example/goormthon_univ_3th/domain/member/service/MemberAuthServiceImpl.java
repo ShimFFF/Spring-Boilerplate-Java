@@ -1,5 +1,6 @@
 package com.example.goormthon_univ_3th.domain.member.service;
 
+import com.example.goormthon_univ_3th.domain.member.client.KakaoMemberClient;
 import com.example.goormthon_univ_3th.domain.member.domain.Member;
 import com.example.goormthon_univ_3th.domain.member.domain.SocialType;
 import com.example.goormthon_univ_3th.domain.member.dto.request.MemberSignUpRequest;
@@ -27,6 +28,8 @@ public class MemberAuthServiceImpl implements MemberAuthorService {
 
     public final MemberService memberService;
     public final MemberRefreshTokenService refreshTokenService;
+
+    public final KakaoMemberClient kakaoMemberClient;
 
     public final JwtProvider jwtTokenProvider;
 
