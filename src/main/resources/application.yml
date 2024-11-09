@@ -3,6 +3,11 @@ spring:
     active: local
 
   datasource:
-    url: jdbc:mysql://localhost:3306/spring-test?serverTimezone=Asia/Seoul
-    username: 1234
-    password: 1234
+    url: jdbc:mysql://localhost:3306/spring-test
+    username: root
+    password: ssw030422123!
+
+jwt:
+  secret: jwt
+  accessExpiration: 36000000
+  refreshExpiration: 864000000
