@@ -65,10 +65,6 @@ public class JwtProvider {
         return new Date(createdDate.getTime() + jwtExpiration);
     }
 
-    // todo: 리프레쉬 토큰으로 새로운 액세스 토큰을 발급하는 함수
-
-    // todo: 리프레쉬와 액세스 토큰의 그 기간을 달리 해야해
-
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
