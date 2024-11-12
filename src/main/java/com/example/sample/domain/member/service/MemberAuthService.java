@@ -7,7 +7,7 @@ import com.example.sample.domain.member.dto.response.MemberGenerateTokenResponse
 import com.example.sample.domain.member.dto.response.MemberIdResponse;
 import com.example.sample.domain.member.dto.response.MemberLoginResponse;
 
-public interface MemberAuthorService {
+public interface MemberAuthService {
     // 소셜 로그인
     MemberLoginResponse socialLogin(final String accessToken, SocialType socialType);
     // 회원가입

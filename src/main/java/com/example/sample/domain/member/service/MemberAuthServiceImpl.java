@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class MemberAuthServiceImpl implements MemberAuthorService {
+public class MemberAuthServiceImpl implements MemberAuthService {
 
     public final MemberRepository memberRepository;
 
