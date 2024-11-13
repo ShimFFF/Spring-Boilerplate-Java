@@ -11,3 +11,16 @@ jwt:
   secret: jwt
   accessExpiration: 36000000
   refreshExpiration: 864000000
+
+cloud:
+  aws:
+    s3:
+      bucket: sample
+    stack:
+      auto: false
+    credentials:
+      accessKey: Aaaaaaaaaaaaaaaa
+      secretKey: 66666666666666666sssssssssss
+    region:
+      static: ap-northeast-2
+      auto: false
