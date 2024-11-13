@@ -76,6 +76,9 @@ public class S3FileComponent {
         String random = String.valueOf(UUID.randomUUID());
 
         // 파일명 생성, 같은 파일명이 있을 경우 덮어쓰기 방지
+        if(category.isEmpty()){
+            return fileName + "_" + random + fileExtension;
+        }
         return category + "/" + fileName + "_" + random + fileExtension;
     }
 
