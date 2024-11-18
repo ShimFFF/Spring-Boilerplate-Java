@@ -16,15 +16,15 @@ footer
 ### Type, gitmoji
 
 깃모지, 태그 : 제목의 형태
-- `:sparkles: Feat : 새로운 기능 추가`
-- `:bug: Fix : 버그 수정`
-- `:memo: Docs : 문서 수정`
-- `:white_check_mark: Test : 테스트 코드 추가`
-- `:recycle: Refactor : 코드 리팩토링`
-- `:art: Style : 코드 의미에 영향을 주지 않는 변경사항(코드 포맷팅, 세미콜론 누락 등..)`
-- `:wrench: Chore : 빌드 부분 혹은 패키지 매니저 수정사항`
-- `:truck: Rename : 파일, 경로, route를 옮기거나 이름 변경`
-- `:fire: Remove : 삭제(파일, 코드)`
+- `:sparkles: feat : 새로운 기능 추가`
+- `:bug: fix : 버그 수정`
+- `:memo: docs : 문서 수정`
+- `:white_check_mark: test : 테스트 코드 추가`
+- `:recycle: refactor : 코드 리팩토링`
+- `:art: style : 코드 의미에 영향을 주지 않는 변경사항(코드 포맷팅, 세미콜론 누락 등..)`
+- `:wrench: chore : 빌드 부분 혹은 패키지 매니저 수정사항`
+- `:truck: rename : 파일, 경로, route를 옮기거나 이름 변경`
+- `:fire: remove : 삭제(파일, 코드)`
 
 ### Body
 - 본문은 한 줄 당 72자 내로 작성한다.
