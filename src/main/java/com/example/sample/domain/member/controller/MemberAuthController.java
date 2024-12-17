@@ -1,7 +1,7 @@
 package com.example.sample.domain.member.controller;
 
 import com.example.sample.domain.member.domain.Member;
-import com.example.sample.domain.member.domain.SocialType;
+import com.example.sample.domain.member.domain.LoginType;
 import com.example.sample.domain.member.dto.request.MemberSignUpRequest;
 import com.example.sample.domain.member.dto.response.MemberGenerateTokenResponse;
 import com.example.sample.domain.member.dto.response.MemberIdResponse;
@@ -34,8 +34,8 @@ public class MemberAuthController {
     })
     @PostMapping("/login")
     public BaseResponse<MemberLoginResponse> socialLogin(@RequestParam(value = "accessToken") String accessToken,
-                                                         @RequestParam(value = "socialType") SocialType socialType) {
-        return BaseResponse.onSuccess(memberAuthService.socialLogin(accessToken, socialType));
+                                                         @RequestParam(value = "loginType") LoginType loginType) {
+        return BaseResponse.onSuccess(memberAuthService.socialLogin(accessToken, loginType));
 
     }
 

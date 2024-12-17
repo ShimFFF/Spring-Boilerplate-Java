@@ -22,7 +22,7 @@ public class Member extends BaseEntity {
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    private SocialType socialType;
+    private LoginType loginType;
 
     private String clientId;
 
@@ -32,12 +32,16 @@ public class Member extends BaseEntity {
 
 
     @Builder
-    public Member(String name, String email, SocialType socialType, String clientId) {
+    public Member(String name, String email, LoginType loginType, String clientId) {
         this.name = name;
         this.email = email;
         this.role = Role.MEMBER;
-        this.socialType = socialType;
+        this.loginType = loginType;
         this.clientId = clientId;
+    }
+
+    public void changeRole(Role role) {
+        this.role = role;
     }
 
     public void updateRefreshToken(String refreshToken) {
