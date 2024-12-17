@@ -2,13 +2,14 @@ package com.example.sample.domain.member.service;
 
 import com.example.sample.domain.member.client.KakaoMemberClient;
 import com.example.sample.domain.member.domain.Member;
-import com.example.sample.domain.member.domain.SocialType;
+import com.example.sample.domain.member.domain.LoginType;
 import com.example.sample.domain.member.dto.request.MemberSignUpRequest;
 import com.example.sample.domain.member.dto.response.MemberGenerateTokenResponse;
 import com.example.sample.domain.member.dto.response.MemberIdResponse;
 import com.example.sample.domain.member.dto.response.MemberLoginResponse;
 import com.example.sample.domain.member.mapper.MemberMapper;
 import com.example.sample.domain.member.repository.MemberRepository;
+import com.example.sample.domain.member.strategy.context.LoginContext;
 import com.example.sample.global.common.exception.RestApiException;
 import com.example.sample.global.common.exception.code.status.AuthErrorStatus;
 import com.example.sample.global.config.security.jwt.JwtProvider;
@@ -24,25 +25,17 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MemberAuthServiceImpl implements MemberAuthService {
 
-    public final MemberRepository memberRepository;
-
     public final MemberService memberService;
     public final MemberRefreshTokenService refreshTokenService;
 
-    public final KakaoMemberClient kakaoMemberClient;
-
     public final JwtProvider jwtTokenProvider;
-
-    public final MemberMapper memberMapper;
+    private final LoginContext loginContext;
 
     // 소셜 로그인을 수행하는 함수
     @Override
-    public MemberLoginResponse socialLogin(String accessToken, SocialType socialType){
-        // 로그인 구분
-        if(socialType.equals(SocialType.KAKAO))
-            return loginByKakao(accessToken);
-
-        return null;
+    @Transactional
+    public MemberLoginResponse socialLogin(String accessToken, LoginType loginType) {
+        return loginContext.executeStrategy(accessToken, loginType);
     }
 
     // 회원가입을 수행하는 함수
@@ -107,43 +100,5 @@ public class MemberAuthServiceImpl implements MemberAuthService {
         loginMember.delete();
 
         return new MemberIdResponse(loginMember.getId());
-    }
-
-    private MemberLoginResponse loginByKakao(final String accessToken){
-        // kakao 서버와 통신해서 유저 고유값(clientId) 받기
-        String clientId = kakaoMemberClient.getkakaoClientID(accessToken);
-        // 존재 여부 파악
-        Optional<Member> getMember = memberRepository.findByClientIdAndSocialType(clientId, SocialType.KAKAO);
-
-        // 1. 없으면 : Member 객체 생성하고 DB 저장
-        if(getMember.isEmpty()) {
-            return saveNewMember(clientId, SocialType.KAKAO);
-        }
-        // 2. 있으면 : 새로운 토큰 반환
-        boolean isServiceMember = getMember.get().getName() != null;
-        return getNewToken(getMember.get(), isServiceMember);
-    }
-
-    private MemberLoginResponse saveNewMember(String clientId, SocialType socialType) {
-        Member member = memberMapper.toMember(clientId, socialType);
-        Member newMember =  memberRepository.save(member);
-
-        return getNewToken(newMember, false);
-    }
-
-    private MemberLoginResponse getNewToken(Member member, boolean isServiceMember) {
-        // jwt 토큰 생성
-        TokenInfo tokenInfo = jwtTokenProvider.generateToken(member.getId().toString(), member.getRole().toString());
-        // refreshToken 디비에 저장
-        refreshTokenService.saveRefreshToken(tokenInfo.refreshToken(), member);
-
-        return memberMapper.toLoginMember(member, tokenInfo, isServiceMember);
-    }
-
-    // refresh 토큰 저장 함수
-    @Transactional
-    public void saveRefreshToken(String refreshToken, Member member) {
-        member.setRefreshToken(refreshToken);
-        memberRepository.save(member);
     }
 }
