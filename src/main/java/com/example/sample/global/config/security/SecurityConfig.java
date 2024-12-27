@@ -1,6 +1,8 @@
 package com.example.sample.global.config.security;
 
+import com.example.sample.domain.member.domain.Role;
 import com.example.sample.global.config.security.auth.CustomAccessDeniedHandler;
+import com.example.sample.global.config.security.auth.PrincipalDetailsService;
 import com.example.sample.global.config.security.jwt.JwtAuthenticationFilter;
 import com.example.sample.global.config.security.jwt.JwtExceptionFilter;
 import com.example.sample.global.config.security.jwt.JwtProvider;
@@ -27,12 +29,14 @@ public class SecurityConfig {
     private final JwtExceptionFilter jwtExceptionFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final PrincipalDetailsService principalDetailsService;
 
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
+                .userDetailsService(principalDetailsService)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -41,9 +45,10 @@ public class SecurityConfig {
                         .requestMatchers("/s3/**").permitAll()
                         .requestMatchers("/members/sign-up").permitAll()
                         .requestMatchers("/members/login").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_"+ Role.ADMIN)
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(exceptionHandling -> exceptionHandling.accessDeniedHandler(customAccessDeniedHandler))
                 .addFilterBefore(jwtExceptionFilter, LogoutFilter.class) // filter 등록시 등록되어있는 필터와 순서를 정의해야함
                 .addFilterBefore(jwtAuthenticationFilter, LogoutFilter.class)
                 .build();

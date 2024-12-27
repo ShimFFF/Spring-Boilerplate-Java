@@ -43,8 +43,12 @@ public class JwtProvider {
             expiration=calculateExpirationDate(now, jwtRefreshExpiration);
         }
 
-        Claims claims = Jwts.claims().setSubject(subject); // JWT payload 에 저장되는 정보단위
-        claims.put("memberId",  memberId);
+        // todo: subject 바꾸기
+        Claims claims = Jwts.claims().setSubject("your-mode"); // JWT payload 에 저장되는 정보단위
+
+        claims.put("memberId", memberId);
+        claims.put("role", "ROLE_USER");
+
 
         return Jwts.builder()
                 .setClaims(claims)

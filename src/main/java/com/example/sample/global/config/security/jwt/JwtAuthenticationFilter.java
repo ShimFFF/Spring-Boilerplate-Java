@@ -1,5 +1,8 @@
 package com.example.sample.global.config.security.jwt;
 
+import com.example.sample.domain.member.domain.Member;
+import com.example.sample.domain.member.service.MemberService;
+import com.example.sample.global.config.security.auth.PrincipalDetails;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,6 +28,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     // 오직 인증 정보를 설정하는 역할만 수행
 
     private final JwtProvider jwtTokenProvider;
+    private final MemberService memberService;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -41,9 +45,14 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     private Authentication getAuthentication(String token) {
         Claims claims = jwtTokenProvider.getClaims(token);
         String role = claims.get("role", String.class);
-        Collection<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role));
-        UserDetails userDetails = new User(claims.getSubject(), "", authorities);
-        return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
+
+        Long memberId = Long.valueOf(claims.get("memberId", String.class)); // memberId 가져옴
+        Member member = memberService.findById(memberId); // Member 객체 조회
+
+        // PrincipalDetails 사용
+        PrincipalDetails principalDetails = new PrincipalDetails(member);
+
+        return new UsernamePasswordAuthenticationToken(principalDetails, "", principalDetails.getAuthorities());
     }
 }
 

@@ -1,5 +1,6 @@
 package com.example.sample.global.config.security;
 
+import com.example.sample.domain.member.service.MemberService;
 import com.example.sample.global.config.security.auth.CustomAccessDeniedHandler;
 import com.example.sample.global.config.security.jwt.JwtAuthenticationFilter;
 import com.example.sample.global.config.security.jwt.JwtExceptionFilter;
@@ -30,8 +31,8 @@ public class BeanRegister {
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtProvider jwtProvider) {
-        return new JwtAuthenticationFilter(jwtProvider);
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtProvider jwtProvider, MemberService memberService) {
+        return new JwtAuthenticationFilter(jwtProvider, memberService);
     }
 
 

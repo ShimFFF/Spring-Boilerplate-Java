@@ -31,7 +31,7 @@ public class PrincipalDetails implements UserDetails {
     @Override                    // 소셜 로그인만 지원해서 pwd 필요 없음
     public String getPassword() {
         // 소셜 로그인만 지원하므로 비밀번호가 필요하지 않음
-        return null;
+        return "";
         //return encodePwd().encode("this is password");
     }
 
